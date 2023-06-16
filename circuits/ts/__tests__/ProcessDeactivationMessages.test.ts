@@ -514,15 +514,23 @@ describe('ProcessDeactivationMessages circuit', () => {
             poll = maciState.polls[pollId]
         })
         
-        it('should throw if numSignUps 0 with 1 deactivation message', async () => {
+        it('should throw if numSignUps 0 instead of 1 with 1 deactivation message', async () => {
+            const NUM_OF_SIGNUPS = 0; // Wrong number, should be 1
+            const VOTE_WEIGHT = voteWeight;
+            const MESSAGE_PUB_KEY = new PubKey([BigInt(0), BigInt(0)]);
+            const KEY_FOR_COORD_PART_OF_SHARED_KEY = coordinatorKeypair.pubKey;
+            const DEACTIVATED_KEYS_TREE_ELEMENT_INDEX = 0;
+            const STATE_TREE_ELEMENT_INDEX = stateIndex;
+            const KEY_FOR_ELGAMAL_ENCRYPTION = coordinatorKeypair.pubKey.rawPubKey;
+
             const salt = (new Keypair()).privKey.rawPrivKey
 
             // Key deactivation command
             const command = new PCommand(
                 stateIndex, //BigInt(1),
-                new PubKey([BigInt(0), BigInt(0)]), // 0,0 PubKey
+                MESSAGE_PUB_KEY,
                 voteOptionIndex, // 0,
-                voteWeight, // vote weight
+                VOTE_WEIGHT, // vote weight
                 BigInt(2), // nonce
                 BigInt(pollId),
                 salt,
@@ -533,7 +541,7 @@ describe('ProcessDeactivationMessages circuit', () => {
             const ecdhKeypair = new Keypair()
             const sharedKey = Keypair.genEcdhSharedKey(
                 ecdhKeypair.privKey,
-                coordinatorKeypair.pubKey,
+                KEY_FOR_COORD_PART_OF_SHARED_KEY,
             )
 
             // Encrypt command and publish
@@ -592,13 +600,13 @@ describe('ProcessDeactivationMessages circuit', () => {
 
             console.log(encPubKeys)
 
-            const deactivatedTreePathElements = [deactivatedKeys.genMerklePath(0).pathElements];
+            const deactivatedTreePathElements = [deactivatedKeys.genMerklePath(DEACTIVATED_KEYS_TREE_ELEMENT_INDEX).pathElements];
             // Pad array
             for (let i = 1; i < maxValues.maxMessages; i += 1) {
-                deactivatedTreePathElements.push(deactivatedKeys.genMerklePath(0).pathElements)
+                deactivatedTreePathElements.push(deactivatedKeys.genMerklePath(DEACTIVATED_KEYS_TREE_ELEMENT_INDEX).pathElements)
             }
             
-            const stateLeafPathElements = [maciState.stateTree.genMerklePath(stateIndex).pathElements];
+            const stateLeafPathElements = [maciState.stateTree.genMerklePath(STATE_TREE_ELEMENT_INDEX).pathElements];
             // Pad array
             for (let i = 1; i < maxValues.maxMessages; i += 1) {
                 stateLeafPathElements.push(maciState.stateTree.genMerklePath(0).pathElements)
@@ -614,7 +622,7 @@ describe('ProcessDeactivationMessages circuit', () => {
             // Pad array
             for (let i = 1; i < maxValues.maxMessages; i += 1) {
                 elGamalEnc.push(elGamalEncryptBit(
-                    coordinatorKeypair.pubKey.rawPubKey, 
+                    KEY_FOR_ELGAMAL_ENCRYPTION, 
                     BigInt(0), 
                     BigInt(1)
                 ))
@@ -632,21 +640,30 @@ describe('ProcessDeactivationMessages circuit', () => {
                 maskingValues,
                 deactivatedTreeRoot: deactivatedKeys.root,
                 currentStateRoot: maciState.stateTree.root,
-                numSignUps: 0,
+                numSignUps: NUM_OF_SIGNUPS,
             })
 
             await expect(genWitness(circuit, inputs)).rejects.toThrow();
         })
 
-        it('should throw if deactivation message signed with wrong key', async () => {
+        it('should throw if public key part of shared key is not coordinators', async () => {
+            const NUM_OF_SIGNUPS = 1;
+            const VOTE_WEIGHT = voteWeight;
+            const MESSAGE_PUB_KEY = new PubKey([BigInt(0), BigInt(0)]);
+            const ecdhKeypair = new Keypair()
+            const KEY_FOR_COORD_PART_OF_SHARED_KEY = ecdhKeypair.pubKey; // Wrong pub key, should be coordinators
+            const DEACTIVATED_KEYS_TREE_ELEMENT_INDEX = 0;
+            const STATE_TREE_ELEMENT_INDEX = stateIndex;
+            const KEY_FOR_ELGAMAL_ENCRYPTION = coordinatorKeypair.pubKey.rawPubKey;
+
             const salt = (new Keypair()).privKey.rawPrivKey
 
             // Key deactivation command
             const command = new PCommand(
                 stateIndex, //BigInt(1),
-                new PubKey([BigInt(0), BigInt(0)]), // 0,0 PubKey
+                MESSAGE_PUB_KEY, // 0,0 PubKey
                 voteOptionIndex, // 0,
-                voteWeight, // vote weight
+                VOTE_WEIGHT, // vote weight
                 BigInt(2), // nonce
                 BigInt(pollId),
                 salt,
@@ -654,10 +671,9 @@ describe('ProcessDeactivationMessages circuit', () => {
 
             const signature = command.sign(userKeypair.privKey)
 
-            const ecdhKeypair = new Keypair()
             const sharedKey = Keypair.genEcdhSharedKey(
                 ecdhKeypair.privKey,
-                ecdhKeypair.pubKey,
+                KEY_FOR_COORD_PART_OF_SHARED_KEY
             )
 
             // Encrypt command and publish
@@ -716,13 +732,13 @@ describe('ProcessDeactivationMessages circuit', () => {
 
             console.log(encPubKeys)
 
-            const deactivatedTreePathElements = [deactivatedKeys.genMerklePath(0).pathElements];
+            const deactivatedTreePathElements = [deactivatedKeys.genMerklePath(DEACTIVATED_KEYS_TREE_ELEMENT_INDEX).pathElements];
             // Pad array
             for (let i = 1; i < maxValues.maxMessages; i += 1) {
-                deactivatedTreePathElements.push(deactivatedKeys.genMerklePath(0).pathElements)
+                deactivatedTreePathElements.push(deactivatedKeys.genMerklePath(DEACTIVATED_KEYS_TREE_ELEMENT_INDEX).pathElements)
             }
             
-            const stateLeafPathElements = [maciState.stateTree.genMerklePath(stateIndex).pathElements];
+            const stateLeafPathElements = [maciState.stateTree.genMerklePath(STATE_TREE_ELEMENT_INDEX).pathElements];
             // Pad array
             for (let i = 1; i < maxValues.maxMessages; i += 1) {
                 stateLeafPathElements.push(maciState.stateTree.genMerklePath(0).pathElements)
@@ -738,7 +754,7 @@ describe('ProcessDeactivationMessages circuit', () => {
             // Pad array
             for (let i = 1; i < maxValues.maxMessages; i += 1) {
                 elGamalEnc.push(elGamalEncryptBit(
-                    coordinatorKeypair.pubKey.rawPubKey, 
+                    KEY_FOR_ELGAMAL_ENCRYPTION, 
                     BigInt(0), 
                     BigInt(1)
                 ))
@@ -756,21 +772,29 @@ describe('ProcessDeactivationMessages circuit', () => {
                 maskingValues,
                 deactivatedTreeRoot: deactivatedKeys.root,
                 currentStateRoot: maciState.stateTree.root,
-                numSignUps: 1,
+                numSignUps: NUM_OF_SIGNUPS,
             })
 
             await expect(genWitness(circuit, inputs)).rejects.toThrow();
         })
 
         it('should throw if deactivatedTreePathElements passed to the circuit are invalid', async () => {
+            const NUM_OF_SIGNUPS = 1;
+            const VOTE_WEIGHT = voteWeight;
+            const MESSAGE_PUB_KEY = new PubKey([BigInt(0), BigInt(0)]);
+            const KEY_FOR_COORD_PART_OF_SHARED_KEY = coordinatorKeypair.pubKey;
+            const DEACTIVATED_KEYS_TREE_ELEMENT_INDEX = 1; // Wrong index, should be 0
+            const STATE_TREE_ELEMENT_INDEX = stateIndex;
+            const KEY_FOR_ELGAMAL_ENCRYPTION = coordinatorKeypair.pubKey.rawPubKey;
+
             const salt = (new Keypair()).privKey.rawPrivKey
 
             // Key deactivation command
             const command = new PCommand(
                 stateIndex, //BigInt(1),
-                new PubKey([BigInt(0), BigInt(0)]), // 0,0 PubKey
+                MESSAGE_PUB_KEY, // 0,0 PubKey
                 voteOptionIndex, // 0,
-                voteWeight, // vote weight
+                VOTE_WEIGHT, // vote weight
                 BigInt(2), // nonce
                 BigInt(pollId),
                 salt,
@@ -779,9 +803,10 @@ describe('ProcessDeactivationMessages circuit', () => {
             const signature = command.sign(userKeypair.privKey)
 
             const ecdhKeypair = new Keypair()
+
             const sharedKey = Keypair.genEcdhSharedKey(
                 ecdhKeypair.privKey,
-                coordinatorKeypair.pubKey,
+                KEY_FOR_COORD_PART_OF_SHARED_KEY
             )
 
             // Encrypt command and publish
@@ -840,14 +865,13 @@ describe('ProcessDeactivationMessages circuit', () => {
 
             console.log(encPubKeys)
 
-            // Set invalid path on deactivatedTreePathElements 
-            const deactivatedTreePathElements = [deactivatedKeys.genMerklePath(1).pathElements];
+            const deactivatedTreePathElements = [deactivatedKeys.genMerklePath(DEACTIVATED_KEYS_TREE_ELEMENT_INDEX).pathElements];
             // Pad array
             for (let i = 1; i < maxValues.maxMessages; i += 1) {
-                deactivatedTreePathElements.push(deactivatedKeys.genMerklePath(1).pathElements)
+                deactivatedTreePathElements.push(deactivatedKeys.genMerklePath(DEACTIVATED_KEYS_TREE_ELEMENT_INDEX).pathElements)
             }
             
-            const stateLeafPathElements = [maciState.stateTree.genMerklePath(stateIndex).pathElements];
+            const stateLeafPathElements = [maciState.stateTree.genMerklePath(STATE_TREE_ELEMENT_INDEX).pathElements];
             // Pad array
             for (let i = 1; i < maxValues.maxMessages; i += 1) {
                 stateLeafPathElements.push(maciState.stateTree.genMerklePath(0).pathElements)
@@ -863,7 +887,7 @@ describe('ProcessDeactivationMessages circuit', () => {
             // Pad array
             for (let i = 1; i < maxValues.maxMessages; i += 1) {
                 elGamalEnc.push(elGamalEncryptBit(
-                    coordinatorKeypair.pubKey.rawPubKey, 
+                    KEY_FOR_ELGAMAL_ENCRYPTION, 
                     BigInt(0), 
                     BigInt(1)
                 ))
@@ -881,21 +905,29 @@ describe('ProcessDeactivationMessages circuit', () => {
                 maskingValues,
                 deactivatedTreeRoot: deactivatedKeys.root,
                 currentStateRoot: maciState.stateTree.root,
-                numSignUps: 1,
+                numSignUps: NUM_OF_SIGNUPS,
             })
 
             await expect(genWitness(circuit, inputs)).rejects.toThrow();
         })
 
         it('should throw if stateLeafPathElements passed to the circuit are invalid', async () => {
+            const NUM_OF_SIGNUPS = 1;
+            const VOTE_WEIGHT = voteWeight;
+            const MESSAGE_PUB_KEY = new PubKey([BigInt(0), BigInt(0)]);
+            const KEY_FOR_COORD_PART_OF_SHARED_KEY = coordinatorKeypair.pubKey;
+            const DEACTIVATED_KEYS_TREE_ELEMENT_INDEX = 0; 
+            const STATE_TREE_ELEMENT_INDEX = 0; // Wrong index, should be stateIndex var
+            const KEY_FOR_ELGAMAL_ENCRYPTION = coordinatorKeypair.pubKey.rawPubKey;
+
             const salt = (new Keypair()).privKey.rawPrivKey
 
             // Key deactivation command
             const command = new PCommand(
                 stateIndex, //BigInt(1),
-                new PubKey([BigInt(0), BigInt(0)]), // 0,0 PubKey
+                MESSAGE_PUB_KEY, // 0,0 PubKey
                 voteOptionIndex, // 0,
-                voteWeight, // vote weight
+                VOTE_WEIGHT, // vote weight
                 BigInt(2), // nonce
                 BigInt(pollId),
                 salt,
@@ -904,9 +936,10 @@ describe('ProcessDeactivationMessages circuit', () => {
             const signature = command.sign(userKeypair.privKey)
 
             const ecdhKeypair = new Keypair()
+
             const sharedKey = Keypair.genEcdhSharedKey(
                 ecdhKeypair.privKey,
-                coordinatorKeypair.pubKey,
+                KEY_FOR_COORD_PART_OF_SHARED_KEY
             )
 
             // Encrypt command and publish
@@ -965,17 +998,16 @@ describe('ProcessDeactivationMessages circuit', () => {
 
             console.log(encPubKeys)
 
-            const deactivatedTreePathElements = [deactivatedKeys.genMerklePath(0).pathElements];
+            const deactivatedTreePathElements = [deactivatedKeys.genMerklePath(DEACTIVATED_KEYS_TREE_ELEMENT_INDEX).pathElements];
             // Pad array
             for (let i = 1; i < maxValues.maxMessages; i += 1) {
-                deactivatedTreePathElements.push(deactivatedKeys.genMerklePath(0).pathElements)
+                deactivatedTreePathElements.push(deactivatedKeys.genMerklePath(DEACTIVATED_KEYS_TREE_ELEMENT_INDEX).pathElements)
             }
             
-            // Set invalid path on stateLeafPathElements 
-            const stateLeafPathElements = [maciState.stateTree.genMerklePath(0).pathElements];
+            const stateLeafPathElements = [maciState.stateTree.genMerklePath(STATE_TREE_ELEMENT_INDEX).pathElements];
             // Pad array
             for (let i = 1; i < maxValues.maxMessages; i += 1) {
-                stateLeafPathElements.push(maciState.stateTree.genMerklePath(1).pathElements)
+                stateLeafPathElements.push(maciState.stateTree.genMerklePath(0).pathElements)
             }
 
             const currentStateLeaves = [maciState.stateLeaves[1].asCircuitInputs()];
@@ -988,7 +1020,7 @@ describe('ProcessDeactivationMessages circuit', () => {
             // Pad array
             for (let i = 1; i < maxValues.maxMessages; i += 1) {
                 elGamalEnc.push(elGamalEncryptBit(
-                    coordinatorKeypair.pubKey.rawPubKey, 
+                    KEY_FOR_ELGAMAL_ENCRYPTION, 
                     BigInt(0), 
                     BigInt(1)
                 ))
@@ -1006,21 +1038,29 @@ describe('ProcessDeactivationMessages circuit', () => {
                 maskingValues,
                 deactivatedTreeRoot: deactivatedKeys.root,
                 currentStateRoot: maciState.stateTree.root,
-                numSignUps: 1,
+                numSignUps: NUM_OF_SIGNUPS,
             })
 
             await expect(genWitness(circuit, inputs)).rejects.toThrow();
         })
 
         it('should throw if pub key in the PCommand not special case [0, 0]', async () => {
+            const NUM_OF_SIGNUPS = 1;
+            const VOTE_WEIGHT = voteWeight;
+            const MESSAGE_PUB_KEY = new PubKey([BigInt(1), BigInt(0)]);// Wrong pub key, must be 0,0 for this special case of deactivation
+            const KEY_FOR_COORD_PART_OF_SHARED_KEY = coordinatorKeypair.pubKey;
+            const DEACTIVATED_KEYS_TREE_ELEMENT_INDEX = 0; 
+            const STATE_TREE_ELEMENT_INDEX = stateIndex;
+            const KEY_FOR_ELGAMAL_ENCRYPTION = coordinatorKeypair.pubKey.rawPubKey;
+
             const salt = (new Keypair()).privKey.rawPrivKey
 
             // Key deactivation command
             const command = new PCommand(
                 stateIndex, //BigInt(1),
-                new PubKey([BigInt(1), BigInt(0)]), // 0,0 PubKey
+                MESSAGE_PUB_KEY, // 0,0 PubKey
                 voteOptionIndex, // 0,
-                voteWeight, // vote weight
+                VOTE_WEIGHT, // vote weight
                 BigInt(2), // nonce
                 BigInt(pollId),
                 salt,
@@ -1029,9 +1069,10 @@ describe('ProcessDeactivationMessages circuit', () => {
             const signature = command.sign(userKeypair.privKey)
 
             const ecdhKeypair = new Keypair()
+
             const sharedKey = Keypair.genEcdhSharedKey(
                 ecdhKeypair.privKey,
-                coordinatorKeypair.pubKey,
+                KEY_FOR_COORD_PART_OF_SHARED_KEY
             )
 
             // Encrypt command and publish
@@ -1090,14 +1131,13 @@ describe('ProcessDeactivationMessages circuit', () => {
 
             console.log(encPubKeys)
 
-            // Set invalid path on deactivatedTreePathElements 
-            const deactivatedTreePathElements = [deactivatedKeys.genMerklePath(1).pathElements];
+            const deactivatedTreePathElements = [deactivatedKeys.genMerklePath(DEACTIVATED_KEYS_TREE_ELEMENT_INDEX).pathElements];
             // Pad array
             for (let i = 1; i < maxValues.maxMessages; i += 1) {
-                deactivatedTreePathElements.push(deactivatedKeys.genMerklePath(1).pathElements)
+                deactivatedTreePathElements.push(deactivatedKeys.genMerklePath(DEACTIVATED_KEYS_TREE_ELEMENT_INDEX).pathElements)
             }
             
-            const stateLeafPathElements = [maciState.stateTree.genMerklePath(stateIndex).pathElements];
+            const stateLeafPathElements = [maciState.stateTree.genMerklePath(STATE_TREE_ELEMENT_INDEX).pathElements];
             // Pad array
             for (let i = 1; i < maxValues.maxMessages; i += 1) {
                 stateLeafPathElements.push(maciState.stateTree.genMerklePath(0).pathElements)
@@ -1113,7 +1153,7 @@ describe('ProcessDeactivationMessages circuit', () => {
             // Pad array
             for (let i = 1; i < maxValues.maxMessages; i += 1) {
                 elGamalEnc.push(elGamalEncryptBit(
-                    coordinatorKeypair.pubKey.rawPubKey, 
+                    KEY_FOR_ELGAMAL_ENCRYPTION, 
                     BigInt(0), 
                     BigInt(1)
                 ))
@@ -1131,21 +1171,29 @@ describe('ProcessDeactivationMessages circuit', () => {
                 maskingValues,
                 deactivatedTreeRoot: deactivatedKeys.root,
                 currentStateRoot: maciState.stateTree.root,
-                numSignUps: 1,
+                numSignUps: NUM_OF_SIGNUPS,
             })
 
             await expect(genWitness(circuit, inputs)).rejects.toThrow();
         })
 
         it('should throw if voteWeight in the PCommand not 0', async () => {
+            const NUM_OF_SIGNUPS = 1;
+            const VOTE_WEIGHT = BigInt(1); // Wrong vote weight, should be voteWeight var
+            const MESSAGE_PUB_KEY = new PubKey([BigInt(0), BigInt(0)]);
+            const KEY_FOR_COORD_PART_OF_SHARED_KEY = coordinatorKeypair.pubKey;
+            const DEACTIVATED_KEYS_TREE_ELEMENT_INDEX = 0; 
+            const STATE_TREE_ELEMENT_INDEX = stateIndex;
+            const KEY_FOR_ELGAMAL_ENCRYPTION = coordinatorKeypair.pubKey.rawPubKey;
+
             const salt = (new Keypair()).privKey.rawPrivKey
 
             // Key deactivation command
             const command = new PCommand(
                 stateIndex, //BigInt(1),
-                new PubKey([BigInt(1), BigInt(0)]), // 0,0 PubKey
+                MESSAGE_PUB_KEY, // 0,0 PubKey
                 voteOptionIndex, // 0,
-                BigInt(1), // vote weight
+                VOTE_WEIGHT, // vote weight
                 BigInt(2), // nonce
                 BigInt(pollId),
                 salt,
@@ -1154,9 +1202,10 @@ describe('ProcessDeactivationMessages circuit', () => {
             const signature = command.sign(userKeypair.privKey)
 
             const ecdhKeypair = new Keypair()
+
             const sharedKey = Keypair.genEcdhSharedKey(
                 ecdhKeypair.privKey,
-                coordinatorKeypair.pubKey,
+                KEY_FOR_COORD_PART_OF_SHARED_KEY
             )
 
             // Encrypt command and publish
@@ -1215,14 +1264,13 @@ describe('ProcessDeactivationMessages circuit', () => {
 
             console.log(encPubKeys)
 
-            // Set invalid path on deactivatedTreePathElements 
-            const deactivatedTreePathElements = [deactivatedKeys.genMerklePath(1).pathElements];
+            const deactivatedTreePathElements = [deactivatedKeys.genMerklePath(DEACTIVATED_KEYS_TREE_ELEMENT_INDEX).pathElements];
             // Pad array
             for (let i = 1; i < maxValues.maxMessages; i += 1) {
-                deactivatedTreePathElements.push(deactivatedKeys.genMerklePath(1).pathElements)
+                deactivatedTreePathElements.push(deactivatedKeys.genMerklePath(DEACTIVATED_KEYS_TREE_ELEMENT_INDEX).pathElements)
             }
             
-            const stateLeafPathElements = [maciState.stateTree.genMerklePath(stateIndex).pathElements];
+            const stateLeafPathElements = [maciState.stateTree.genMerklePath(STATE_TREE_ELEMENT_INDEX).pathElements];
             // Pad array
             for (let i = 1; i < maxValues.maxMessages; i += 1) {
                 stateLeafPathElements.push(maciState.stateTree.genMerklePath(0).pathElements)
@@ -1238,7 +1286,7 @@ describe('ProcessDeactivationMessages circuit', () => {
             // Pad array
             for (let i = 1; i < maxValues.maxMessages; i += 1) {
                 elGamalEnc.push(elGamalEncryptBit(
-                    coordinatorKeypair.pubKey.rawPubKey, 
+                    KEY_FOR_ELGAMAL_ENCRYPTION, 
                     BigInt(0), 
                     BigInt(1)
                 ))
@@ -1256,21 +1304,30 @@ describe('ProcessDeactivationMessages circuit', () => {
                 maskingValues,
                 deactivatedTreeRoot: deactivatedKeys.root,
                 currentStateRoot: maciState.stateTree.root,
-                numSignUps: 1,
+                numSignUps: NUM_OF_SIGNUPS,
             })
 
             await expect(genWitness(circuit, inputs)).rejects.toThrow();
         })
 
         it('should throw if elgamalEncryption not performed with coordination pub key', async () => {
+            const NUM_OF_SIGNUPS = 1;
+            const VOTE_WEIGHT = voteWeight;
+            const MESSAGE_PUB_KEY = new PubKey([BigInt(0), BigInt(0)]);
+            const KEY_FOR_COORD_PART_OF_SHARED_KEY = coordinatorKeypair.pubKey;
+            const DEACTIVATED_KEYS_TREE_ELEMENT_INDEX = 0; 
+            const STATE_TREE_ELEMENT_INDEX = stateIndex;
+            const ecdhKeypair = new Keypair()
+            const KEY_FOR_ELGAMAL_ENCRYPTION = ecdhKeypair.pubKey.rawPubKey; // wrong pub key, should be coordinators
+
             const salt = (new Keypair()).privKey.rawPrivKey
 
             // Key deactivation command
             const command = new PCommand(
                 stateIndex, //BigInt(1),
-                new PubKey([BigInt(1), BigInt(0)]), // 0,0 PubKey
+                MESSAGE_PUB_KEY, // 0,0 PubKey
                 voteOptionIndex, // 0,
-                voteWeight, // vote weight
+                VOTE_WEIGHT, // vote weight
                 BigInt(2), // nonce
                 BigInt(pollId),
                 salt,
@@ -1278,10 +1335,9 @@ describe('ProcessDeactivationMessages circuit', () => {
 
             const signature = command.sign(userKeypair.privKey)
 
-            const ecdhKeypair = new Keypair()
             const sharedKey = Keypair.genEcdhSharedKey(
                 ecdhKeypair.privKey,
-                coordinatorKeypair.pubKey,
+                KEY_FOR_COORD_PART_OF_SHARED_KEY
             )
 
             // Encrypt command and publish
@@ -1340,14 +1396,13 @@ describe('ProcessDeactivationMessages circuit', () => {
 
             console.log(encPubKeys)
 
-            // Set invalid path on deactivatedTreePathElements 
-            const deactivatedTreePathElements = [deactivatedKeys.genMerklePath(1).pathElements];
+            const deactivatedTreePathElements = [deactivatedKeys.genMerklePath(DEACTIVATED_KEYS_TREE_ELEMENT_INDEX).pathElements];
             // Pad array
             for (let i = 1; i < maxValues.maxMessages; i += 1) {
-                deactivatedTreePathElements.push(deactivatedKeys.genMerklePath(1).pathElements)
+                deactivatedTreePathElements.push(deactivatedKeys.genMerklePath(DEACTIVATED_KEYS_TREE_ELEMENT_INDEX).pathElements)
             }
             
-            const stateLeafPathElements = [maciState.stateTree.genMerklePath(stateIndex).pathElements];
+            const stateLeafPathElements = [maciState.stateTree.genMerklePath(STATE_TREE_ELEMENT_INDEX).pathElements];
             // Pad array
             for (let i = 1; i < maxValues.maxMessages; i += 1) {
                 stateLeafPathElements.push(maciState.stateTree.genMerklePath(0).pathElements)
@@ -1363,7 +1418,7 @@ describe('ProcessDeactivationMessages circuit', () => {
             // Pad array
             for (let i = 1; i < maxValues.maxMessages; i += 1) {
                 elGamalEnc.push(elGamalEncryptBit(
-                    userKeypair.pubKey.rawPubKey, 
+                    KEY_FOR_ELGAMAL_ENCRYPTION, 
                     BigInt(0), 
                     BigInt(1)
                 ))
@@ -1381,7 +1436,7 @@ describe('ProcessDeactivationMessages circuit', () => {
                 maskingValues,
                 deactivatedTreeRoot: deactivatedKeys.root,
                 currentStateRoot: maciState.stateTree.root,
-                numSignUps: 1,
+                numSignUps: NUM_OF_SIGNUPS,
             })
 
             await expect(genWitness(circuit, inputs)).rejects.toThrow();
