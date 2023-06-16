@@ -49,7 +49,7 @@ const coordinatorKeypair = new Keypair()
 const circuit = 'processDeactivationMessages_test'
 
 describe('ProcessDeactivationMessages circuit', () => {
-    describe('1 user, 2 messages', () => {
+    describe('1 user, 0, 1 or 2 deactivation messages', () => {
         const maciState = new MaciState()
         const voteWeight = BigInt(0)
         const voteOptionIndex = BigInt(0)
@@ -470,6 +470,48 @@ describe('ProcessDeactivationMessages circuit', () => {
         
             const newMessageChainHash = await getSignalByName(circuit, witness, 'main.newMessageChainHash')
             expect(newMessageChainHash).toEqual(H2.toString());
+        })
+    })
+
+    describe('1 user, wrong circuit inputs', () => {
+        const maciState = new MaciState()
+        const voteWeight = BigInt(0)
+        const voteOptionIndex = BigInt(0)
+        let stateIndex
+        let pollId
+        let poll
+        const messages: Message[] = []
+        const commands: PCommand[] = []
+        const H0 = BigInt('8370432830353022751713833565135785980866757267633941821328460903436894336785');
+        let H;
+        let H2;
+        const userKeypair = new Keypair(new PrivKey(BigInt(1)));
+
+        beforeAll(async () => {
+            // Sign up and publish
+            stateIndex = maciState.signUp(
+                userKeypair.pubKey,
+                voiceCreditBalance,
+                // BigInt(1), 
+                BigInt(Math.floor(Date.now() / 1000)),
+            )
+
+            // Merge state tree
+            maciState.stateAq.mergeSubRoots(0)
+            maciState.stateAq.merge(STATE_TREE_DEPTH)
+
+            // Deploy new poll
+            pollId = maciState.deployPoll(
+                duration,
+                // BigInt(2 + duration), 
+                BigInt(Math.floor(Date.now() / 1000) + duration),
+                maxValues,
+                treeDepths,
+                messageBatchSize,
+                coordinatorKeypair,
+            )
+
+            poll = maciState.polls[pollId]
         })
         
         it('should throw if numSignUps 0 with 1 deactivation message', async () => {
