@@ -76,7 +76,7 @@ const executeSuite = async (data: any, expect: any) => {
             ` -v ${config.constants.maci.voteOptionTreeDepth}` +
             ` -b ${config.constants.poll.messageBatchDepth}` +
             ` -p ./zkeys/ProcessMessages_10-2-1-2_test.0.zkey` +
-            ` -zpd ./zkeys/ProcessDeactivationMessages_5-10_test.0.zkey` +
+            ` -zpd ./zkeys/ProcessDeactivationMessages_25-10_test.0.zkey` +
             ` -t ./zkeys/TallyVotes_10-1-2_test.0.zkey` +
             ` -znkg ./zkeys/GenerateKeyFromDeactivated_10_test.0.zkey` +
             ` -k ${vkAddress}` +
@@ -348,7 +348,7 @@ const executeSuiteElgamal = async (data: any, expect: any) => {
             ` -v ${config.constants.maci.voteOptionTreeDepth}` +
             ` -b ${config.constants.poll.messageBatchDepth}` +
             ` -p ./zkeys/ProcessMessages_10-2-1-2_test.0.zkey` +
-            ` -zpd ./zkeys/ProcessDeactivationMessages_5-10_test.0.zkey` +
+            ` -zpd ./zkeys/ProcessDeactivationMessages_25-10_test.0.zkey` +
             ` -t ./zkeys/TallyVotes_10-1-2_test.0.zkey` +
             ` -znkg ./zkeys/GenerateKeyFromDeactivated_10_test.0.zkey` +
             ` -k ${vkAddress}` +
@@ -478,8 +478,8 @@ const executeSuiteElgamal = async (data: any, expect: any) => {
             ` --state-num-sr-queue-ops 1 ` +
             ` --deactivated-keys-num-sr-queue-ops 1 ` +
             ` --from-block 0 ` +
-            ` --process-deactivation-witnessgen ./zkeys/ProcessDeactivationMessages_5-10_test ` +
-            ` --process-deactivation-zkey ./zkeys/ProcessDeactivationMessages_5-10_test.0.zkey ` +
+            ` --process-deactivation-witnessgen ./zkeys/ProcessDeactivationMessages_25-10_test ` +
+            ` --process-deactivation-zkey ./zkeys/ProcessDeactivationMessages_25-10_test.0.zkey ` +
             ` --rapidsnark ~/rapidsnark/build/prover `
         execute(completeDeactivationCommand)
 
