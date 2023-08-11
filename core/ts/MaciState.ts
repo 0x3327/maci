@@ -482,10 +482,8 @@ class Poll {
             deactivatedLeaves.push(deactivatedLeaf);
         }
 
-        const maxMessages = 5; //  TODO: Where do we read this from?
-
         // Pad array
-        for (let i = this.deactivationEncPubKeys.length; i < maxMessages; i += 1) {
+        for (let i = this.deactivationEncPubKeys.length; i < this.maxValues.maxMessages; i += 1) {
             this.deactivationEncPubKeys.push(new PubKey([BigInt(0), BigInt(0)]))
         }
 
@@ -497,22 +495,22 @@ class Poll {
         }
 
         // Pad array
-        for (let i = this.deactivationMessages.length; i < maxMessages; i += 1) {
+        for (let i = this.deactivationMessages.length; i < this.maxValues.maxMessages; i += 1) {
             deactivatedTreePathElements.push(this.stateTree.genMerklePath(0).pathElements)
         }
     
         // Pad array
-        for (let i = stateLeafPathElements.length; i < maxMessages; i += 1) {
+        for (let i = stateLeafPathElements.length; i < this.maxValues.maxMessages; i += 1) {
             stateLeafPathElements.push(this.stateTree.genMerklePath(0).pathElements)
         }
     
         // Pad array
-        for (let i = currentStateLeaves.length; i < maxMessages; i += 1) {
+        for (let i = currentStateLeaves.length; i < this.maxValues.maxMessages; i += 1) {
             currentStateLeaves.push(blankStateLeaf.asCircuitInputs())
         }
 
         // Pad array
-        for (let i = this.deactivationMessages.length; i < maxMessages; i += 1) {
+        for (let i = this.deactivationMessages.length; i < this.maxValues.maxMessages; i += 1) {
             const padMask = genRandomSalt();
             const [padc1, padc2] = elGamalEncryptBit(
                 this.coordinatorKeypair.pubKey.rawPubKey,
