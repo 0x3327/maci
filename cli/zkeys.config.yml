@@ -39,7 +39,7 @@ circuits:
 
 - template: "../circuits/circom/processDeactivationMessages.circom"
   component: "ProcessDeactivationMessages"
-  params: [25, 10] # (deactivation)msgQueueSize, stateTreeDepth
+  params: [5, 10] # (deactivation)msgQueueSize, stateTreeDepth
   type: "test"
   pubInputs: ["inputHash"]
 
@@ -131,7 +131,7 @@ ptauFiles:
       name: "powersOfTau28_hez_final_20.ptau"
 
   21:
-      url: "https://www.dropbox.com/sh/mn47gnepqu88mzl/AABiMm_4UMnvU0VIkCDVX9XZa/powersOfTau28_hez_final_21.ptau?dl=1"
+      url: "https://hermez.s3-eu-west-1.amazonaws.com/powersOfTau28_hez_final_21.ptau"
       name: "powersOfTau28_hez_final_21.ptau"
 
   22:
