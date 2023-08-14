@@ -39,7 +39,7 @@ circuits:
 
 - template: "../circuits/circom/processDeactivationMessages.circom"
   component: "ProcessDeactivationMessages"
-  params: [5, 10] # (deactivation)msgQueueSize, stateTreeDepth
+  params: [25, 10] # (deactivation)msgQueueSize, stateTreeDepth
   type: "test"
   pubInputs: ["inputHash"]
 
