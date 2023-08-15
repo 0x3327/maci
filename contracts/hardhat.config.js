@@ -16,16 +16,20 @@ module.exports = {
 		},
 	},
 	networks: {
+		localhost: {
+			timeout: 400000000
+		  },
 		hardhat: {
 			accounts: {
 				mnemonic:
 					'candy maple cake sugar pudding cream honey rich smooth crumble sweet treat',
 			},
-			loggingEnabled: false,
+			loggingEnabled: true,
 			allowUnlimitedContractSize: true,
 			throwOnTransactionFailures: true,
 			throwOnCallFailures: true,
-			blockGasLimit: 25000000
+			blockGasLimit: 25000000,
+			timeout: 400000000
 		},
 	},
 	contractSizer: {
@@ -33,4 +37,7 @@ module.exports = {
 		runOnCompile: true,
 		disambiguatePaths: false,
 	},
+	mocha: {
+		timeout: 400000000
+		},
 };
