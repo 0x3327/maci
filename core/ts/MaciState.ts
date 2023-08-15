@@ -62,8 +62,8 @@ const DEACT_MESSAGE_INIT_HASH: BigInt = BigInt('83704328303530227517138335651357
 // Also see: Polls.sol
 class Poll {
     public duration: number
-    // Note that we only store the PubKey on-chain while this class stores the
-    // Keypair for the sake of convenience
+    // Note that we only store the PubKey on-chain while this class stores 
+    // the Keypair for the sake of convenience
     public coordinatorKeypair: Keypair
     public treeDepths: TreeDepths
     public batchSizes: BatchSizes
