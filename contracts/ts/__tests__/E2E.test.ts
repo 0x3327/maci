@@ -63,6 +63,7 @@ describe("MACI - E2E", () => {
     const seed = 42 // Random generator seed value used for masking values during the message deactivation processing.
     const fromBlock = 0 // Indicates which block to start from to find events.
     const stateNumSrQueueOps = 1 // The number of subroot queue operations to merge for the MACI state tree.
+    const messageNumSrQueueOps = 1 // The number of subroot queue operations to merge for the MACI message tree.
     const deactivatedKeysNumSrQueueOps = 1 // The number of subroot queue operations to merge for the deactivated keys tree.
     /// @todo using random salt can lead to invalid salt size.
     // const salt = genRandomSalt()
@@ -707,7 +708,7 @@ describe("MACI - E2E", () => {
 
     ///@dev nb. This has already been done implicitly in the test 
     /// case of the completion of user deactivation.
-    it("should check for completed merge of signup messages", async () => {
+    it("should check for completed merge of signup messages (state tree)", async () => {
         // Get ABIs.
         const [ accQueueContractAbi ] = parseArtifact('AccQueue')
 
@@ -724,5 +725,55 @@ describe("MACI - E2E", () => {
         
         expect(await pollContract.stateAqMerged()).toBeTruthy
         expect(pollId).toBe(0)
+    })
+
+    it("should merge the message tree", async () => {
+        // Get message tree depth.
+        const messageTreeDepth = Number((await pollContract.treeDepths()).messageTreeDepth)
+
+        // Get main root.
+        let mainRoot = (await messageAQContract.getMainRoot(messageTreeDepth.toString())).toString()
+
+        // Check if subtrees have been merged.
+        let subTreesMerged = await messageAQContract.subTreesMerged()
+
+        expect(Number(mainRoot)).toBe(0) // = not merged yet.
+        expect(subTreesMerged).toBe(false) // = not merged yet.
+
+        // Merge.
+        while (!subTreesMerged) {
+            // Get indices.
+            const indices = (await messageAQContract.getSrIndices()).map((x: any) => Number(x))
+            
+            // Send tx.
+            const tx = await pollContract.mergeMessageAqSubRoots(messageNumSrQueueOps)
+            const receipt = await tx.wait()
+
+            const logMergeMessageAqSubRoots = pollContract.interface.parseLog(receipt.logs[0])
+
+            expect(logMergeMessageAqSubRoots.name).toBe("MergeMessageAqSubRoots")
+            expect(Number(logMergeMessageAqSubRoots.args._numSrQueueOps)).toBe(Number(messageNumSrQueueOps))
+
+            subTreesMerged = await messageAQContract.subTreesMerged()
+        }
+
+        expect(subTreesMerged).toBeTruthy
+
+        // Check for fully merge of the message AQ.
+        mainRoot = (await messageAQContract.getMainRoot(messageTreeDepth.toString())).toString()
+        expect(Number(mainRoot)).toBe(0) // = not fully merged yet.
+
+        // Complete the merge (fully).
+        const tx = await pollContract.mergeMessageAq()
+        const receipt = await tx.wait()
+
+        const logMergeMessageAq = pollContract.interface.parseLog(receipt.logs[0])
+
+        expect(logMergeMessageAq.name).toBe("MergeMessageAq")
+        expect(BigInt(logMergeMessageAq.args._messageRoot)).toBe(BigInt(await messageAQContract.getMainRoot(messageTreeDepth.toString())))
+    })
+
+    it("should generate proofs", async () => {
+
     })
 })
