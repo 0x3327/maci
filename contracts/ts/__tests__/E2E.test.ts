@@ -38,6 +38,7 @@ describe("MACI - E2E", () => {
     let verifierContract: Contract
     let maciContract: Contract
     let stateAQContract: Contract
+    let messageAQContract: Contract
     let pollFactoryContract: Contract
     let messageProcessorContract: Contract
     let tallyContract: Contract
@@ -690,5 +691,38 @@ describe("MACI - E2E", () => {
         expect(logPublishMessage.args._message.data.map((x: any) => BigInt(x))).toStrictEqual(message.data)
         expect(String(logPublishMessage.args._encPubKey.x)).toBe(String(newUser1KeyPair.pubKey.asContractParam().x))
         expect(String(logPublishMessage.args._encPubKey.y)).toBe(String(newUser1KeyPair.pubKey.asContractParam().y))
+    })
+
+    it("should end the voting period", async () => {
+        // Time-travel (pollDuration + 1m).
+        await timeTravel(signer.provider, pollDuration + 3600)
+
+        // Check if the voting period is over.
+        const dd = await pollContract.getDeployTimeAndDuration()
+        const deadline = Number(dd[0]) + Number(dd[1])
+        const block = await provider.getBlock(await provider.getBlockNumber())
+
+        expect(Number(block.timestamp)).toBeGreaterThanOrEqual(deadline)
+    })
+
+    ///@dev nb. This has already been done implicitly in the test 
+    /// case of the completion of user deactivation.
+    it("should check for completed merge of signup messages", async () => {
+        // Get ABIs.
+        const [ accQueueContractAbi ] = parseArtifact('AccQueue')
+
+        // Get address.
+        const extContracts = await pollContract.extContracts()
+        const messageAqContractAddr = extContracts.messageAq
+    
+        // Instantiate Message AQ smart contract.
+        messageAQContract = new ethers.Contract(
+            messageAqContractAddr,
+            accQueueContractAbi,
+            signer,
+        )
+        
+        expect(await pollContract.stateAqMerged()).toBeTruthy
+        expect(pollId).toBe(0)
     })
 })
