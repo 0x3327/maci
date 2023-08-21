@@ -13,10 +13,10 @@ A new tree is added which represents the tree of deactivated keys.
 
 ## Process
 
-The upgraded process looks like this:
+The upgraded (user) process looks like this:
 
 1. User’s registration (signUp). This occurs initially (one time) when the user registers their public key.
-2. Public key deactivation. There is a deactivation (rerandomization) period within which the user can deactivate their current public key.
+2. Public key deactivation. There is a deactivation period within which the user can deactivate their current public key.
 3. New key generation. The user registers a new public key based on the old, deactivated one.
 4. Voting. The user casts a vote by publishing a message containing their new public key.
 
@@ -24,7 +24,7 @@ The upgraded process looks like this:
 
 `signUp` in [signUp.ts](../cli/ts/signUp.ts).
 
-cli’s `signUp` method calls the `signUp` function on the `MACI.sol` contract, and logs retrieved `stateIndex`.
+CLI’s `signUp` method calls the `signUp` function on the `MACI.sol` contract, and logs retrieved `stateIndex`.
 The user sends their public key (two coordinates of the elliptic curve) which is registered in the state tree (new leaf enqueue). Aside from the public key it contains the number of vote credits of a user.
 
 Contract's `signUp` function creates `StateLeaf` that contains the user’s `pubKey`, `voteCredits`, and registration `timestamp`. It hashes `StateLeaf` using the *Poseidon* hash function where elements of the array are $x$ and $y$ coordinates of the `pubKey`, and the aforementioned `voteCredits` and `timestamp`.
@@ -105,7 +105,7 @@ Since the deactivation period is different from the voting period, and in order 
 
 `confirmDeactivation` in [confirmDeactivation.ts](../cli/ts/confirmDeactivation.ts).
 
-<!-- TODO: Does he wait for the deactivation period or reacts immediately? -->
+<!-- Does he wait for the deactivation period or reacts immediately? He waits the period to expire in completeDeactivation function... -->
 The coordinator waits for the deactivation period to expire upon which he collects all `AttemptKeyDeactivation` events and starts to process the deactivation messages, in batches.
 
 He reconstructs the MACI state using `genMaciStateFromContract()` function which merges the state tree.
@@ -162,17 +162,14 @@ emit DeactivateKey(_subRoot);
 
 In `completeDeactivation()` function, again, the MACI state is reconstructed and `processDeactivationMessages()` is called to obtain `circuitInputs`.These inputs are required for [processDeactivationMessages.circom](../circuits/circom/processDeactivationMessages.circom) to generate proof of correct processing of deactivation messages.
 
-<!-- TODO: Adjust this -->
-The coordinator submits the proof to the `completeDeactivation()` function of the `MessageProcessor` smart contract. On the smart contract, two important things are happening:
-
-1. Merge of the deactivated-keys tree:
+The coordinator first calls the `mergeForDeactivation()` function of the `MessageProcessor` where the merge of deactivated-keys tree is happening:
 
 ```solidity
 deactivatedKeysAq.mergeSubRoots(_deactivatedKeysNumSrQueueOps);
 deactivatedKeysAq.merge(messageTreeDepth);
 ```
 
-2. Verification of the submitted proof
+He then submits the generated proof to the `completeDeactivation()` function of the `MessageProcessor` smart contract where the verification of the submitted proof is happening.
 
 The verification (partly) relies on the incremental hashing of the (incoming) deactivation messages (deactivation chain hash) - proves the hash of the final message he provided is equal to the stored hash.
 
@@ -232,16 +229,17 @@ The coordinator proves through this ZK circuit that he encrypted the status corr
 A new message type is added (type 3). This command is invoke by the user.
 
 In `generateNewKey()` function, the user needs to provide his old and new public-private key pair.
-<!-- TODO: Fix prompting for coordinator's private key; currently it is done because genMaciStateFromContract requires coord's keypair.-->
 
-The MACI state is reconstructed using `genMaciStateFromContract()` function which which fetches the events and state from the smart contracts and replays them in the local maci state to reconstruct it.
+The MACI state is reconstructed using `genMaciStateFromContract()` function which fetches the events and state from the smart contracts and replays them in the local maci state to reconstruct it.
 
 From the reconstructed MACI state, `generateCircuitInputsForGenerateNewKey()` is called which takes the following arguments:
 
 - `userMaciNewPubKey`
 - `userMaciOldPrivKey`
 - `userMaciOldPubKey`
+- `coordinatorPubKey`
 - `stateIndex`
+- `newCreditBalance`
 - `salt`
 - `pollId`
 
@@ -288,8 +286,7 @@ tx = await mpContract.generateNewKeyFromDeactivated(
     coordinatorKeypair.pubKey.asContractParam(),
     encPubKey.asContractParam(),
     pollContract.address,
-    formattedProof,
-    { gasLimit: 10000000 },
+    formattedProof
 )
 ```
 
@@ -305,7 +302,6 @@ uint256 input = genGenerateNewKeyFromDeactivatedPublicInputHash(
 );
 ```
 
-<!-- TODO: maybe provide more wording here (first sentence)? -->
 This input is verified against the `_proof` provided to this smart contract function. If it passes, the function `generateNewKeyFromDeactivated` on the Poll smart contract is called.
 
 *Note: generateNewKeyFromDeactivated function is divided into two parts in MessageProcessor and Poll smart contracts due to the size limitation.*
