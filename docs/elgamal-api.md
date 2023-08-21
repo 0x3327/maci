@@ -125,7 +125,7 @@ The `generateNewKey` command is used to generate a new key based on the previous
 #### Usage
 
 ```sh
-node ./build/index.js generateNewKey --new-pub-key <newMaciPublicKey> --new-priv-key <newMaciPrivateKey> --old-pub-key <oldMaciPublicKey> --old-priv-key <oldMaciPrivateKey> --coord-priv-key <coordinatorPrivateKey> --state-index <stateIndex> --salt <salt> --poll-id <pollId> --from-block <fromBlock> --new-key-generation-witnessgen <pathToWitnessGenLib> --new-key-generation-zkey <pathToZkeyFile> --rapidsnark <pathToRapidSnarkLib>
+node ./build/index.js generateNewKey --new-pub-key <newMaciPublicKey> --new-priv-key <newMaciPrivateKey> --old-pub-key <oldMaciPublicKey> --old-priv-key <oldMaciPrivateKey> --state-index <stateIndex> --salt <salt> --poll-id <pollId> --from-block <fromBlock> --new-key-generation-witnessgen <pathToWitnessGenLib> --new-key-generation-zkey <pathToZkeyFile> --rapidsnark <pathToRapidSnarkLib>
 ```
 
 #### Arguments
@@ -134,8 +134,6 @@ node ./build/index.js generateNewKey --new-pub-key <newMaciPublicKey> --new-priv
 - `--new-priv-key`, `-npk`: Users's new serialized MACI private key.
 - `--old-pub-key`, `-o`: User's old MACI public key.
 - `--old-priv-key`, `-opk`: Users's old serialized MACI private key.
-<!-- TODO: This argument is the legacy from the usage of genMaciStateFromContract function; See how to work around it. -->
-- `--coord-priv-key`, `-cpk`: Coordinator's serialized MACI private key.
 - `--state-index`, `-i`: User's state index.
 - `--salt`, `-s`: Message salt.
 - `--poll-id`, `-o`: ID of the Poll.
