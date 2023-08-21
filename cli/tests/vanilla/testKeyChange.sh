@@ -59,4 +59,6 @@ $MACI_CLI timeTravel \
 
 gen_proofs "$POLL_ID"
 
+# TODO: Currently vote talying with key change does not work because of https://github.com/privacy-scaling-explorations/maci/issues/717
+# This test should return a non-zero tally once the above issue is taken care of.
 prove_and_verify_on_chain "$POLL_ID"
