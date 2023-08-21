@@ -1,11 +1,15 @@
 # Circuits
 
-MACI has three zk-SNARK circuits:
+MACI has five zk-SNARK circuits:
 
 1. `ProcessMessages.circom`, which takes a batch of messages, and updates the
    state and ballot trees according to the contents of said messages.
-2. `TallyVotes.circom`, which counts votes from users' ballots, batch by batch.
-3. `Subsidy.circom`, which implements [pairwise subsidy](https://hackmd.io/@chaosma/H1_9xmT2K)
+2. `ProcessDeactivationMessages.circom`, which 
+<!-- TODO: provide description. -->
+3. `GenerateKeyFromDeactivated.circom`, which 
+<!-- TODO: provide description. -->
+4. `TallyVotes.circom`, which counts votes from users' ballots, batch by batch.
+5. `Subsidy.circom`, which implements [pairwise subsidy](https://hackmd.io/@chaosma/H1_9xmT2K)
 
 Each circuit is parameterised and it is important to set the right parameters
 to your use case. For example, if you want to support up to 3125 messages, the message tree depth parameter should be set to `5` (as $5^5 = 3125$).
@@ -22,6 +26,21 @@ This config file defines the parameters required for MACI's circuits.
 | 1 | Message tree depth | Allows $(5^{n})$ votes or key-change messages. | 
 | 2 | Message batch tree depth | Allows $(5^{n})$ messages to be processed per batch. |
 | 3 | Vote option tree depth | Allows $(5^{n})$ vote options. |
+
+### Deactivation message processing
+
+| # | Parameter | Description |
+|-|-|-|
+<!-- TODO: Provide/verify description -->
+| 0 | Message queue size | ...DESCRIPTION | 
+| 1 | State tree depth | Should be set to 10. Allows 9,765,625 signups. | 
+
+### Generate key from deactivated
+
+| # | Parameter | Description |
+|-|-|-|
+<!-- TODO: Verify description -->
+| 0 | State tree depth | Should be set to 10. Allows 9,765,625 signups. | 
 
 ### Vote tallying
 
