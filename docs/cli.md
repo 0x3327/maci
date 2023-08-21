@@ -24,7 +24,7 @@ npm run hardhat
 | User | Generate MACI public key | `genMaciPubkey` |
 | Coordinator | Deploy VkRegistry | `deployVkRegistry` |
 | Coordinator | Set verifying keys | `setVerifyingKeys` |
-| Coordinator | Create MACI instance | `create `|
+| Coordinator | Create MACI instance | `create`|
 | Coordinator | Deploy a new poll | `deployPoll`|
 | Coordinator | Deploy a new poll processor and tallyer | `deployPpt`|
 | User | Sign up | `signup` |
@@ -60,6 +60,8 @@ After initial key deactivation:
 New private key: macisk.acd54022725c8cf56dcd392808e3c4d170100d9fba4009ef0e8173ffe17f2e0
 New public key:  macipk.e57109205d2b33b90db8421727a2d4fb91cdf3a8e050fbd12aa5a9f4045585a2
 
+
+<!-- The definition and usage of newly-added cli commands is documented in elgamal-api document. Do we need to add it here as well to follow the convention of this document? -->
 ### Coordinator: Deploy VkRegistry
 
 This command deploys an instance of a VkRegistry contract. Multiple MACI

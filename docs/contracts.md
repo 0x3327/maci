@@ -200,6 +200,10 @@ function deployPoll(
 
 This contract allows users to vote on a Poll.
 
+<!-- New Poll SC functions are: deactivateKey, confirmDeactivation, and generateNewKeyFromDeactivated (called from MessageProcessor SC) - do we also need to document them here? -->
+
+<!-- Also, MessageProcessor SC isn't documented here at all -->
+
 The main functions of the contract are as follows:
 
 * `topup` - This function accepts two parameters, a `stateIndex`, and an `amount`. It can only be called before the voting deadline.
