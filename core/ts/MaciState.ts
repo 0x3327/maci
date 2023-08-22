@@ -278,7 +278,7 @@ class Poll {
             this.deactivationSignatures.push(signature)
             this.deactivationCommands.push(command)
         } catch (e) {
-            console.log(`error cannot decrypt: ${e.message}`)
+            console.log(`error cannot decrypt PCommand: ${e.message}`)
             const keyPair = new Keypair()
             const command = new PCommand(BigInt(1), keyPair.pubKey, BigInt(0), BigInt(0), BigInt(0), BigInt(0), BigInt(0))
             this.deactivationCommands.push(command)
@@ -373,7 +373,7 @@ class Poll {
             let { command, signature } = PCommand.decrypt(_message, sharedKey)
             this.commands.push(command)
         } catch (e) {
-            //console.log(`error cannot decrypt: ${e.message}`)
+            console.log(`error cannot decrypt KCommand: ${e.message}`)
             let keyPair = new Keypair()
             let command = new PCommand(BigInt(0), keyPair.pubKey, BigInt(0), BigInt(0), BigInt(0), BigInt(0), BigInt(0))
             this.commands.push(command)
@@ -745,10 +745,6 @@ class Poll {
                     try{
                         // If the command is valid
                         const r = this.processMessage(idx)
-                        // console.log(messageIndex, r ? 'valid' : 'invalid')
-                        // console.log("r:"+r.newStateLeaf )
-                        // DONE: replace with try/catch after implementing error
-                        // handling
                         const index = r.stateLeafIndex
 
                         currentStateLeaves.unshift(r.originalStateLeaf)
@@ -1039,8 +1035,6 @@ class Poll {
             this.maciStateRef.pollBeingProcessed = false
         }
 
-        // console.log(circuitInputs)
-        // console.log(stringifyBigInts(circuitInputs));
         return stringifyBigInts(circuitInputs)
     }
 
@@ -1206,14 +1200,13 @@ class Poll {
         let deactivationStatus = null;
         try {
             const dec = elGamalDecryptBit(this.coordinatorKeypair.privKey.rawPrivKey, c1r, c2r);
-            console.log(dec);
             if (dec == BigInt(1)) {
                 deactivationStatus = 1;
             } else {
                 deactivationStatus = 0;
             }
         } catch (err) {
-            console.log('Failed to decrypt');
+            console.log('Failed to decrypt elGamal');
             deactivationStatus = 0
         }
 
@@ -1231,7 +1224,6 @@ class Poll {
 
         // Add nullifier to the tree
         if (!found) {
-            console.log('NOT FOUND!')
             const res = await this.nullifiersTree.insert(nullifier, nullifier);
             siblings = res.siblings
         }
@@ -1249,14 +1241,11 @@ class Poll {
         const oldStateRoot = this.stateTree.root;
         let newStateRoot = this.stateTree.root;
 
-        console.log(deactivationStatus, Number(newStateIndex), this.stateLeaves.length)
         if (!found && deactivationStatus === 1 && Number(newStateIndex) >= this.stateLeaves.length) {
-            console.log('INSERT INTO STATE TREE!')
             stateTreeInclusionProof = this.stateTree.genMerklePath(Number(newStateIndex)).pathElements;
             this.stateTree.insert(stateLeaf.hash());
             newStateRoot = this.stateTree.root;
         } else {
-            console.log('DO NOT INSERT INTO STATE TREE!', !found, deactivationStatus === 1, Number(newStateIndex) >= this.stateLeaves.length);
             stateTreeInclusionProof = this.stateTree.genMerklePath(0).pathElements;
         }
 

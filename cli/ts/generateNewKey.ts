@@ -364,7 +364,7 @@ const generateNewKey = async (args: any) => {
         )
         await tx.wait()
 
-        console.log('generateNewKeyFromDeactivated Transaction hash:', tx.hash)
+        console.log('Transaction hash:', tx.hash)
     } catch(e) {
         if (e.message) {
             console.error('Error: the transaction failed.')

@@ -272,7 +272,6 @@ const deactivateKey = async (args: any) => {
         await tx.wait()
 
         console.log('Transaction hash:', tx.hash)
-        console.log('Ephemeral private key:', encKeypair.privKey.serialize())
     } catch(e) {
         if (e.message) {
             if (e.message.endsWith('PollE11')) {
