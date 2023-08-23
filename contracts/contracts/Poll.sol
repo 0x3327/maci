@@ -450,8 +450,6 @@ contract Poll is
      */
     function mergeMaciStateAq(uint256 _pollId) public {
         require(msg.sender == messageProcessorAddress || msg.sender == owner());
-        // This function can only be called once per Poll after the voting
-        // deadline
         require(!stateAqMerged, ERROR_STATE_AQ_ALREADY_MERGED);
 
         stateAqMerged = true;

@@ -209,13 +209,12 @@ The main functions of the contract are as follows:
 * `publishMessage` - This function allows anyone to publish a message, and it accepts the message object as well as an ephemeral public key. This key together with the coordinator public key will be used to generate a shared ECDH key that will encrypt the message.
     Before saving the message, the function will check that the voting deadline has not passed, as well as the max number of messages was not reached. 
 
-The `mergeMaciStateAqSubRoots` function can be called by the contract admin after the voting deadline and looks like the following:
+The `mergeMaciStateAqSubRoots` function can be called by the contract admin and looks like the following:
 
 ```javascript
 function mergeMaciStateAqSubRoots(uint256 _numSrQueueOps, uint256 _pollId)
     public
     onlyOwner
-    isAfterVotingDeadline
     {
         // This function can only be called once per Poll
         require(!stateAqMerged, ERROR_STATE_AQ_ALREADY_MERGED);
@@ -239,10 +238,7 @@ The next function, is presented below:
 function mergeMaciStateAq(uint256 _pollId)
         public
         onlyOwner
-        isAfterVotingDeadline
     {
-        // This function can only be called once per Poll after the voting
-        // deadline
         require(!stateAqMerged, ERROR_STATE_AQ_ALREADY_MERGED);
 
         stateAqMerged = true;
