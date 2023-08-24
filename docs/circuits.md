@@ -4,10 +4,8 @@ MACI has five zk-SNARK circuits:
 
 1. `ProcessMessages.circom`, which takes a batch of messages, and updates the
    state and ballot trees according to the contents of said messages.
-2. `ProcessDeactivationMessages.circom`, which 
-<!-- TODO: provide description. -->
-3. `GenerateKeyFromDeactivated.circom`, which 
-<!-- TODO: provide description. -->
+2. `ProcessDeactivationMessages.circom`, which takes a batch of deactivation messages, processes them and constructs a deactivated keys tree where the leaves contain hashed public key and a status of deactivation encrypted using ElGamal encryption (enc(0) - failed deactivation / enc(1) - successful deactivation)
+3. `GenerateKeyFromDeactivated.circom`, which constructs a proof that new key was generated based on the deactivated key found in the deactivated keys tree, proving knowledge of the private key of the deactivated key and that the value of a credit balance for the new key is less then or equal to the previous credit balance. 
 4. `TallyVotes.circom`, which counts votes from users' ballots, batch by batch.
 5. `Subsidy.circom`, which implements [pairwise subsidy](https://hackmd.io/@chaosma/H1_9xmT2K)
 
@@ -32,7 +30,7 @@ This config file defines the parameters required for MACI's circuits.
 | # | Parameter | Description |
 |-|-|-|
 <!-- TODO: Provide/verify description -->
-| 0 | Message queue size | ...DESCRIPTION | 
+| 0 | Message queue size | Number of deactivation messages | 
 | 1 | State tree depth | Should be set to 10. Allows 9,765,625 signups. | 
 
 ### Generate key from deactivated
