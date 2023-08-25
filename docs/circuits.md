@@ -29,7 +29,6 @@ This config file defines the parameters required for MACI's circuits.
 
 | # | Parameter | Description |
 |-|-|-|
-<!-- TODO: Provide/verify description -->
 | 0 | Message queue size | Number of deactivation messages | 
 | 1 | State tree depth | Should be set to 10. Allows 9,765,625 signups. | 
 
@@ -37,7 +36,6 @@ This config file defines the parameters required for MACI's circuits.
 
 | # | Parameter | Description |
 |-|-|-|
-<!-- TODO: Verify description -->
 | 0 | State tree depth | Should be set to 10. Allows 9,765,625 signups. | 
 
 ### Vote tallying

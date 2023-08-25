@@ -200,9 +200,7 @@ function deployPoll(
 
 This contract allows users to vote on a Poll.
 
-<!-- New Poll SC functions are: deactivateKey, confirmDeactivation, and generateNewKeyFromDeactivated (called from MessageProcessor SC) - do we also need to document them here? -->
-
-<!-- Also, MessageProcessor SC isn't documented here at all -->
+<!-- New Poll SC functions are: deactivateKey, confirmDeactivation, and generateNewKeyFromDeactivated (called from MessageProcessor SC), currently documented in elgamal-api.md - do we also need to document them here? -->
 
 The main functions of the contract are as follows:
 

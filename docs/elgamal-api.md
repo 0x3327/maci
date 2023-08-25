@@ -43,7 +43,6 @@ This API documentation describes the new additions to the MACI project for publi
       - [Parameters](#parameters-5)
       - [Response](#response-9)
 
-<!-- TODO: Clean up parameters in CLI/SC commands - required, non-required, never used, etc. - they should be consistent with command usage -->
 ## CLI Commands
 
 ### Deactivate Key
@@ -67,7 +66,6 @@ node ./build/index.js deactivateKey --privkey <maciPrivateKey> --state-index <us
 #### Response
 
 If the operation is successful, the console logs transaction hash and ephemeral private key. Returns an exit status of 0.
-<!-- TODO: Check if exit statuses in deactivateKey command (and other commands) need to be fixed; e.g. line 157 in deactivateKey -->
 If there is an error, the console warns the user. Returns an exit status of 1.
 
 ### Confirm Deactivation
@@ -125,13 +123,12 @@ The `generateNewKey` command is used to generate a new key based on the previous
 #### Usage
 
 ```sh
-node ./build/index.js generateNewKey --new-pub-key <newMaciPublicKey> --new-priv-key <newMaciPrivateKey> --old-pub-key <oldMaciPublicKey> --old-priv-key <oldMaciPrivateKey> --state-index <stateIndex> --salt <salt> --poll-id <pollId> --from-block <fromBlock> --new-key-generation-witnessgen <pathToWitnessGenLib> --new-key-generation-zkey <pathToZkeyFile> --rapidsnark <pathToRapidSnarkLib>
+node ./build/index.js generateNewKey --new-pub-key <newMaciPublicKey> --old-pub-key <oldMaciPublicKey> --old-priv-key <oldMaciPrivateKey> --state-index <stateIndex> --salt <salt> --poll-id <pollId> --from-block <fromBlock> --new-key-generation-witnessgen <pathToWitnessGenLib> --new-key-generation-zkey <pathToZkeyFile> --rapidsnark <pathToRapidSnarkLib>
 ```
 
 #### Arguments
 
 - `--new-pub-key`, `-n`: User's new MACI public key.
-- `--new-priv-key`, `-npk`: Users's new serialized MACI private key.
 - `--old-pub-key`, `-o`: User's old MACI public key.
 - `--old-priv-key`, `-opk`: Users's old serialized MACI private key.
 - `--state-index`, `-i`: User's state index.
