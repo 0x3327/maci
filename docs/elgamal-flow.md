@@ -105,7 +105,6 @@ Since the deactivation period is different from the voting period, and in order 
 
 `confirmDeactivation` in [confirmDeactivation.ts](../cli/ts/confirmDeactivation.ts).
 
-<!-- Does he wait for the deactivation period or reacts immediately? He waits the period to expire in completeDeactivation function... -->
 The coordinator waits for the deactivation period to expire upon which he collects all `AttemptKeyDeactivation` events and starts to process the deactivation messages, in batches.
 
 He reconstructs the MACI state using `genMaciStateFromContract()` function which merges the state tree.
